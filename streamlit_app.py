@@ -24,7 +24,7 @@ pathlib.PosixPath = pathlib.WindowsPath
 #densenet models
 @st.cache_resource(show_spinner=False)  # Cache the model so we don't reload it everytime
 def load_models():
-    model1 = load_model('deep_models\densenet_stage1_all-0.954.hdf5')
+    model1 = load_model('densenet_stage1_all-0.954.hdf5')
     
     return model1
 
@@ -66,7 +66,7 @@ def main():
 
     if app_mode=='Home':    
         st.title('CAR DAMAGE ASSESSMENT')      
-        st.image('images\car_assess_head.jfif') 
+        st.image('car_assess_head.jfif') 
 
     elif app_mode == 'Prediction':       
         st.subheader('PLEASE UPLOAD YOUR DAMAGED CAR')
