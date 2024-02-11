@@ -18,13 +18,13 @@ import time
 from io import BytesIO
 
 #densenet models
-@st.cache_resource(show_spinner=False)  # Cache the model so we don't reload it everytime
+@st.cache_resource()  # Cache the model so we don't reload it everytime
 def load_models():
     model1 = load_model('densenet_stage1_all-0.954.hdf5')
     return model1
 
 # YOLOv5 model (PyTorch)
-@st.cache_resource(show_spinner=False)
+@st.cache_resource()
 def load_yolo_model():
     model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
     model.eval()
