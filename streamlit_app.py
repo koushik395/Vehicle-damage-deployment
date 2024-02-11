@@ -66,7 +66,7 @@ def main():
 
     if app_mode=='Home':    
         st.title('CAR DAMAGE ASSESSMENT')      
-        st.image('images\car_assess_head.jfif') 
+        st.image('car_assess_head.jfif') 
 
     elif app_mode == 'Prediction':       
         st.subheader('PLEASE UPLOAD YOUR DAMAGED CAR')
