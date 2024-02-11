@@ -17,10 +17,6 @@ from PIL import Image
 import time
 from io import BytesIO
 
-import pathlib
-temp = pathlib.PosixPath
-pathlib.PosixPath = pathlib.WindowsPath
-
 #densenet models
 @st.cache_resource(show_spinner=False)  # Cache the model so we don't reload it everytime
 def load_models():
@@ -36,7 +32,7 @@ def load_yolo_model():
     return model
 
 #Creating a single function which predicts wether Car is damaged or not and localizing the damage, severity of damage for a single img
-def report(img_path,model,model1,model2,model3):
+def report(img_path,model,model1):
     report_pred = []
 
     # img = load_img(os.getcwd()+f'/{img_path}',target_size = (256,256))
