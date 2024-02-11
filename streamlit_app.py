@@ -17,62 +17,92 @@ from PIL import Image
 import time
 from io import BytesIO
 
-# Load YOLOv5 model (PyTorch)
-@st.cache(allow_output_mutation=True)
+#densenet models
+@st.cache_resource(show_spinner=False)  # Cache the model so we don't reload it everytime
+def load_models():
+    model1 = load_model('densenet_stage1_all-0.954.hdf5')
+    return model1
+
+# YOLOv5 model (PyTorch)
+@st.cache_resource(show_spinner=False)
 def load_yolo_model():
     model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
     model.eval()
     return model
 
-# Load DenseNet model
-@st.cache(allow_output_mutation=True)
-def load_densenet_model():
-    model = load_model('densenet_stage1_all-0.954.hdf5')
-    return model
+#Creating a single function which predicts wether Car is damaged or not and localizing the damage, severity of damage for a single img
+def report(img_path,model,model1):
+    report_pred = []
 
-# Prediction function
-def predict_damaged(image, yolo_model, densenet_model):
-    # Load and preprocess the image
-    img_array = img_to_array(image)
-    img_array = img_array.reshape((1,) + img_array.shape)
-    
-    # Check if damaged using DenseNet
-    prediction = densenet_model.predict(img_array)
-    if prediction <= 0.5:
-        return "Not Damaged"
+    # img = load_img(os.getcwd()+f'/{img_path}',target_size = (256,256))
+    #Converting into array
+    img_arr = img_to_array(img_path)
+    img_arr = img_arr.reshape((1,) + img_arr.shape)
 
-    # Use YOLOv5 to detect the type and severity of damage
-    results = yolo_model(image)
-    return results
+    #Checking if Damaged or not
+    s1_pred = model1.predict(img_arr)
+    if s1_pred <=0.5:
+        report_pred.append('Damaged')
+    else:
+        report_pred.append('Not Damaged')
+        return report_pred
 
+    #Using YOLO to detect the damage type
+    results = model(img_path)
+    results.render()
+    # Image.fromarray(results.ims[0]).save("static/images/pred.jpg")
+
+    return report_pred,results
+
+        
 # Main app
 def main():
-    st.title('CAR DAMAGE ASSESSMENT')      
-    st.image('car_assess_head.jfif') 
+    app_mode = st.sidebar.selectbox('Select Page',['Home','Prediction']) #two pages      
 
-    uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
+    if app_mode=='Home':    
+        st.title('CAR DAMAGE ASSESSMENT')      
+        st.image('car_assess_head.jfif') 
 
-    if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        st.image(image, caption='Uploaded Image', use_column_width=True)
+    elif app_mode == 'Prediction':       
+        st.subheader('PLEASE UPLOAD YOUR DAMAGED CAR')
+        uploaded_file = st.file_uploader("Upload an image...", type=["jpg", "jpeg", "png"])
 
-        # Load models
-        with st.spinner("Loading models..."):
-            yolo_model = load_yolo_model()
-            densenet_model = load_densenet_model()
+        if uploaded_file is not None:
+            with st.status("Downloading data...", expanded=True) as status:
+                st.write("Loading....!")
+                time.sleep(2)
+                st.write("Please wait....!")
+                time.sleep(1)
+                st.write("About to complete....!")
+                time.sleep(1)
+                model1 = load_models()
+                model = load_yolo_model()
+                status.update(label="Models Loaded", state="complete", expanded=False)  # Display a spinner while loading models
 
-        # Make predictions
-        with st.spinner("Predicting..."):
-            prediction = predict_damaged(image, yolo_model, densenet_model)
+            image = Image.open(uploaded_file)
+            st.image(image, caption='Uploaded Image', use_column_width=True)
 
-        if prediction == "Not Damaged":
-            st.warning("Please check your image! The vehicle appears to be undamaged.")
-        else:
-            st.success("Vehicle is damaged. Damage detected:")
-            st.image(prediction.render()[0], caption='Damage Detection')
+            image = image.resize((256, 256))
 
-            # Download button for the image
-            st.download_button("Download image", prediction.render()[0], "output.jpg")
+            with st.spinner("Predicting..."):  # Display a spinner while making predictions
+                preds,results = report(image,model,model1)
+
+            st.balloons()
+            if preds[0] == 'Damaged':
+                # pred_img = Image.open("static/images/pred.jpg")
+                st.success("Output generated successfully")
+                st.subheader("The vehicle is damaged.")
+                st.subheader("Below is the type of damage detected.")
+                st.image(Image.fromarray(results.ims[0]), caption='Damage Detection')
+
+                buf = BytesIO()
+                Image.fromarray(results.ims[0]).save(buf, format="JPEG")
+                byte_im = buf.getvalue()
+                ste.download_button("Download image", byte_im, "output.jpeg")
+            else:
+                st.warning("Please check your image!")
+                st.subheader("Are you sure the vehicle is damaged?. Please check once.")
+
 
 if __name__ == "__main__":
     main()
