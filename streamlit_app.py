@@ -97,7 +97,7 @@ def main():
                 pred_img = Image.open("static/images/pred.jpg")
                 st.success("Output generated successfully")
                 st.subheader("The vehicle is damaged.")
-                st.subheader("Below is the type of damage detected."")
+                st.subheader("Below is the type of damage detected.")
                 st.image(pred_img, caption='Damage Detection')
 
                 buf = BytesIO()
