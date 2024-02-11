@@ -17,6 +17,9 @@ from PIL import Image
 import time
 from io import BytesIO
 
+import pathlib
+pathlib.PosixPath = pathlib.WindowsPath
+
 #densenet models
 @st.cache_resource()  # Cache the model so we don't reload it everytime
 def load_models():
@@ -32,9 +35,6 @@ def load_yolo_model():
 
 #Creating a single function which predicts wether Car is damaged or not and localizing the damage, severity of damage for a single img
 def report(img_path,model,model1):
-    report_pred = []
-
-    # img = load_img(os.getcwd()+f'/{img_path}',target_size = (256,256))
     #Converting into array
     img_arr = img_to_array(img_path)
     img_arr = img_arr.reshape((1,) + img_arr.shape)
@@ -42,9 +42,9 @@ def report(img_path,model,model1):
     #Checking if Damaged or not
     s1_pred = model1.predict(img_arr)
     if s1_pred <=0.5:
-        report_pred.append('Damaged')
+        report_pred = 'Damaged'
     else:
-        report_pred.append('Not Damaged')
+        report_pred = 'Not Damaged'
         return report_pred
 
     #Using YOLO to detect the damage type
@@ -52,7 +52,7 @@ def report(img_path,model,model1):
     results.render()
     # Image.fromarray(results.ims[0]).save("static/images/pred.jpg")
 
-    return report_pred,results
+    return [report_pred,results]
 
         
 # Main app
@@ -85,18 +85,18 @@ def main():
             image = image.resize((256, 256))
 
             with st.spinner("Predicting..."):  # Display a spinner while making predictions
-                preds,results = report(image,model,model1)
+                out = report(image,model,model1)
 
             st.balloons()
-            if preds[0] == 'Damaged':
+            if out[0] == 'Damaged':
                 # pred_img = Image.open("static/images/pred.jpg")
                 st.success("Output generated successfully")
                 st.subheader("The vehicle is damaged.")
                 st.subheader("Below is the type of damage detected.")
-                st.image(Image.fromarray(results.ims[0]), caption='Damage Detection')
+                st.image(Image.fromarray(out[1].ims[0]), caption='Damage Detection')
 
                 buf = BytesIO()
-                Image.fromarray(results.ims[0]).save(buf, format="JPEG")
+                Image.fromarray(out[1].ims[0]).save(buf, format="JPEG")
                 byte_im = buf.getvalue()
                 ste.download_button("Download image", byte_im, "output.jpeg")
             else:
