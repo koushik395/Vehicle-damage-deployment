@@ -17,8 +17,8 @@ from PIL import Image
 import time
 from io import BytesIO
 
-import pathlib
-pathlib.PosixPath = pathlib.WindowsPath
+# import pathlib
+# pathlib.PosixPath = pathlib.WindowsPath
 
 #densenet models
 @st.cache_resource()  # Cache the model so we don't reload it everytime
