@@ -29,7 +29,7 @@ def load_models():
 # YOLOv5 model (PyTorch)
 @st.cache_resource()
 def load_yolo_model():
-    model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt',source='local')
+    model = torch.hub.load('ultralytics/yolov5', 'custom', path='best.pt')
     model.eval()
     return model
 
