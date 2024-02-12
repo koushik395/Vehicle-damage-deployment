@@ -10,7 +10,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing.image import load_img,img_to_array
 from tensorflow.keras.models import Sequential, Model, load_model
 from PIL import Image
-from PIL import Image
 import time
 from io import BytesIO
 
