@@ -4,6 +4,7 @@ streamlit
 streamlit-ext
 IPython
 opencv-python-headless
+libgl1-mesa-glx
 # Base ------------------------------------------------------------------------
 gitpython>=3.1.30
 matplotlib>=3.3
