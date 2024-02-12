@@ -3,6 +3,7 @@
 streamlit
 streamlit-ext
 IPython
+opencv-python-contrib-headless 
 # Base ------------------------------------------------------------------------
 gitpython>=3.1.30
 matplotlib>=3.3
